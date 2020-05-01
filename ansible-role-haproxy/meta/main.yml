@@ -1,7 +1,0 @@
----
-galaxy_info:
-  author:
-  description: HAProxy configuration.
-  company:
-  license:
-  min_ansible_version: 2.2
