@@ -1,0 +1,16 @@
+---
+- name: Ensuring HAProxy is installed...
+  package: name=haproxy state=present
+
+- name: Ensuring HAProxy is started and enabled...
+  service: name=haproxy state=started enabled=yes
+
+- name: Applying HAProxy configuration...
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    mode: 0644
+    owner: root
+    group: root
+#    validate: haproxy -f %s -c -q
+#  notify: reload haproxy

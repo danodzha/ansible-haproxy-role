@@ -1,0 +1,31 @@
+global
+{% for global_settings in haproxy_global_settings %}
+  {{ global_settings }}
+{% endfor %}
+
+# Default ciphers to use on SSL-enabled listening sockets.
+{% for global_ciphers in haproxy_global_ciphers %}
+  {{ global_ciphers }}
+{% endfor %}
+
+defaults 
+{% for defaults in haproxy_defaults %}
+  {{ defaults }}
+{% endfor %}  
+
+frontend {{ haproxy_frontend_name }}
+  mode {{ haproxy_frontend_mode }}
+  log  {{ haproxy_frontend_log }} 
+  bind {{ haproxy_frontend_bind_address }}:{{ haproxy_frontend_bind_port }} {{ haproxy_frontend_bind_options }}
+{% for frontend_addons in haproxy_frontend_addional_options %}
+  {{ frontend_addons }}
+{% endfor %}  
+{% for frontend_acls in haproxy_frontend_acls %}
+  {{ frontend_acls }}
+{% endfor %}
+
+{% for backend in haproxy_backend_servers %}
+backend {{ backend.name }}
+  mode {{ backend.mode }}
+  server {{ backend.server }} {{ backend.address }} {{ backend.options }} 
+{% endfor %}

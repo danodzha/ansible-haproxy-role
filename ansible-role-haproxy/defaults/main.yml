@@ -1,0 +1,72 @@
+---
+# Global settings
+haproxy_global_settings:     
+- 'log 127.0.0.1:514 len 4096 local1' 
+- 'chroot /var/lib/haproxy'
+- 'pidfile /var/run/haproxy.pidfile'
+- 'maxconn 4000'
+- 'user haproxy'
+- 'group haproxy'
+- 'daemon'
+- 'stats socket /var/lib/haproxy/stats'
+haproxy_global_ciphers: 
+- 'ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS'
+- 'ssl-default-bind-options no-sslv3'
+
+# Default settings
+haproxy_defaults:
+- 'mode http'
+- 'log global'
+- 'option httplog'
+- 'option tcplog'
+- 'option dontlognull'
+- 'option forwardfor except 127.0.0.0/8'
+- 'retries 3'
+- 'errorfile 503 /user/share/haproxy/503/http'
+- 'timeout http-request    10s'
+- 'timeout queue            1m'
+- 'timeout connect          10s'
+- 'timeout client           1m'
+- 'timeout server           1m'
+- 'timeout http-keep-alive  10s'
+- 'timeout check            10s'
+- 'maxconn                  3000'
+
+# Frontend settings.
+haproxy_frontend_name: 'testing'
+haproxy_frontend_mode: 'http'
+haproxy_frontend_log: 'global'
+haproxy_frontend_bind_address: '172.0.3.10'
+haproxy_frontend_bind_port: 443
+haproxy_frontend_bind_options: 'ssl crt /etc/ssl/certs/cloud.pem'
+haproxy_frontend_addional_options:
+- 'option forwardfor'
+- 'option http-server-close'
+- 'reqadd X-Forwarded-Port:\ 443'
+- 'http-request add-header X-Forwarded-Proto https'
+haproxy_frontend_acls:
+- 'acl visdemo hdr(host) -i dell.visdemo.com'
+- 'acl visdemo hdr(host) -m beg -i delladmin-rnd' 
+- 'acl visdemo hdr(host) -m beg -i dell-rnd'
+- 'acl visdemo hdr(host) -m beg -i partneradvantageadmin-rnd'
+- 'acl visdemo hdr(host) -m beg -i partneradvantage-rnd'
+- 'acl softdev hdr(host) -m end -i softdev.gtm.cloud'
+- 'acl nonprod hdr(host) -m end -i softdev.np.gtms.cloud'
+- 'acl nonprod hdr(host) -m end -i np.gtms.cloud'
+- 'acl softdev hdr(host) -m end -i softdev0.np.gtms.cloud'
+- 'use_backend vtxgtms if visdemo'
+- 'use_backend softdev_bk if softdev'
+- 'use_backend nonprod if nonprod'
+
+# Backend settings.
+haproxy_backend_servers:
+- name: nonprod_bk
+  mode: http
+  server: np_proxy
+  address: 172.0.0.39:443
+  options: ssl verify none source 172.10.0.5
+- name: nurjan
+  mode: http
+  server: nurjan.com
+  address: 172.90.100.90:443
+  options: ssl verify none
